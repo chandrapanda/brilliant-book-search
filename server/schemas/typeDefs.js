@@ -14,6 +14,7 @@ const typeDefs = gql`
     authors: [String]!
     description: String
     title: String
+    # TODO: IS THIS CORRECT TO REF IMAGE?
     image: image
     link: String
   }
