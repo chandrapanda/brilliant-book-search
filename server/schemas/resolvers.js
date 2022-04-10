@@ -5,14 +5,11 @@ const { signToken } = require("../utils/auth");
 const resolvers = {
   // Queries
   Query: {
-    users: async () => {
-      return User.find();
-    },
+    // users: async () => {
+    //   return User.find();
+    // },
 
-    users: async (parent, { bookId }) => {
-      return User.findOne({ _id: bookId });
-    },
-
+    // Finds one user by their own login credentials
     me: async (parent, args, context) => {
       if (context.user) {
         return User.findOne({ _id: context / user._id });
@@ -48,16 +45,29 @@ const resolvers = {
     },
 
     // TODO: Save a book to user's collection (subdocument)
-    saveBook: async (parent, { book }, context) => {
+    saveBook: async (parent, { userId, book }, context) => {
+      // If context has a `user` property, the user executing this mutation has a valid JWT and is logged in
       if (context.user) {
-        return User.findOneAndUpdate({ _id: bookId }, {}, {}, {});
+        return User.findOneAndUpdate(
+          { _id: userId },
+          { $addToSet: { books: book } },
+          {
+            new: true,
+            runValidators: true,
+          }
+        );
       }
+      throw new AuthenticationError("Please log in first.");
     },
 
     // Remove a book from a user's collection
     removeBook: async (parent, { book }, context) => {
       if (context.user) {
-        return User.findOneAndDelete({ _id: context.book._id });
+        return User.findOneAndUpdate(
+          { _id: context.user._id },
+          { $pull: { books: book } },
+          { new: true }
+        );
       }
       throw new AuthenticationError("Please log in first.");
     },
