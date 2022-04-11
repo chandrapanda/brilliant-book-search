@@ -11,12 +11,14 @@ const LoginForm = () => {
   const [validated] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
 
+  const [loginUser, { error }] = useMutation(LOGIN_USER);
+
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setUserFormData({ ...userFormData, [name]: value });
   };
 
-  const HandleFormSubmit = async (event) => {
+  const handleFormSubmit = async (event) => {
     event.preventDefault();
 
     // check if form has everything (as per react-bootstrap docs)
@@ -27,16 +29,11 @@ const LoginForm = () => {
     }
 
     try {
-      //Use LOGIN USER method here with useMutation hook
-      const response = await useMutation(LOGIN_USER);
-
-      if (!response.ok) {
-        throw new Error("something went wrong!");
-      }
-
-      const { token, user } = await response.json();
-      console.log(user);
-      Auth.login(token);
+      const { data } = await loginUser({
+        variables: { ...userFormData },
+      });
+      if (!data) throw new Error("Something went wrong!");
+      Auth.login(data.login.token);
     } catch (err) {
       console.error(err);
       setShowAlert(true);
@@ -51,7 +48,7 @@ const LoginForm = () => {
 
   return (
     <>
-      <Form noValidate validated={validated} onSubmit={HandleFormSubmit}>
+      <Form noValidate validated={validated} onSubmit={handleFormSubmit}>
         <Alert
           dismissible
           onClose={() => setShowAlert(false)}
