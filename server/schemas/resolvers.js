@@ -5,14 +5,10 @@ const { signToken } = require("../utils/auth");
 const resolvers = {
   // Queries
   Query: {
-    // users: async () => {
-    //   return User.find();
-    // },
-
     // Finds one user by their own login credentials
     me: async (parent, args, context) => {
       if (context.user) {
-        return User.findOne({ _id: context / user._id });
+        return User.findOne({ _id: context.user._id }).populate("books");
       }
       throw new AuthenticationError("Please log in!");
     },
@@ -20,7 +16,7 @@ const resolvers = {
   // Mutations
   Mutation: {
     //Login
-    login: async (parent, { email, password }) => {
+    loginUser: async (parent, { email, password }) => {
       const user = await User.findOne({ email });
       if (!user) {
         throw new AuthenticationError("No profile with this email found.");
@@ -40,17 +36,16 @@ const resolvers = {
     addUser: async (parent, { username, email, password }) => {
       const user = await User.create({ username, email, password });
       const token = signToken(user);
-
       return { token, user };
     },
 
-    // TODO: Save a book to user's collection (subdocument)
-    saveBook: async (parent, { userId, book }, context) => {
+    // Save a book to user's collection (subdocument)
+    saveBook: async (parent, { book }, { user }) => {
       // If context has a `user` property, the user executing this mutation has a valid JWT and is logged in
       if (context.user) {
         return User.findOneAndUpdate(
-          { _id: userId },
-          { $addToSet: { books: book } },
+          { _id: user._id },
+          { $addToSet: { savedBooks: book } },
           {
             new: true,
             runValidators: true,

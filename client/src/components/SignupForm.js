@@ -3,7 +3,6 @@ import { useMutation } from "@apollo/client";
 import { ADD_USER } from "../utils/mutations";
 import { Form, Button, Alert } from "react-bootstrap";
 
-// import { createUser } from '../utils/API';
 import Auth from "../utils/auth";
 
 const SignupForm = () => {
@@ -18,14 +17,14 @@ const SignupForm = () => {
   // set state for alert
   const [showAlert, setShowAlert] = useState(false);
 
-  const [addUser, { error }] = useMutation(ADD_USER);
+  const [signup] = useMutation(ADD_USER);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setUserFormData({ ...userFormData, [name]: value });
   };
 
-  const HandleFormSubmit = async (event) => {
+  const handleFormSubmit = async (event) => {
     event.preventDefault();
 
     // check if form has everything (as per react-bootstrap docs)
@@ -36,11 +35,15 @@ const SignupForm = () => {
     }
 
     try {
-      const { data } = await addUser({
-        variables: { ...userFormData },
+      const {
+        data: {
+          addUser: { token, user },
+        },
+      } = await signup({
+        variables: userFormData,
       });
-      if (!data) throw new Error("Something went wrong!");
-      Auth.login(data.addUser.token);
+      console.log(user);
+      Auth.login(token);
     } catch (err) {
       console.error(err);
       setShowAlert(true);
@@ -56,7 +59,7 @@ const SignupForm = () => {
   return (
     <>
       {/* This is needed for the validation functionality above */}
-      <Form noValidate validated={validated} onSubmit={HandleFormSubmit}>
+      <Form noValidate validated={validated} onSubmit={handleFormSubmit}>
         {/* show alert if server response is bad */}
         <Alert
           dismissible
