@@ -15,7 +15,7 @@ Google Books API search engine originally built with a RESTful API, and refactor
 
 ## Installation
 
-Run npm i to install dependencies. Then, run npm run build. Thirdly, run npm run develop to automatically open the application in your browser. Alternatively, simply visit the Heroku deployment linked above.
+Run ```md npm i``` to install dependencies. Then, run ```md npm run build```. Thirdly, run ```md npm run develop``` to automatically open the application in your browser. Alternatively, simply visit the Heroku deployment linked above.
 
 ## Usage
 
