@@ -40,34 +40,33 @@ const resolvers = {
     },
 
     // Save a book to user's collection (subdocument)
-    saveBook: async (parent, { book }, context) => {
-      console.log("saveBook from RESOLVERS");
-      // If context has a `user` property, the user executing this mutation has a valid JWT and is logged in
-      if (context.user) {
-        const updatedUser = await User.findOneAndUpdate(
-          { _id: user._id },
-          { $addToSet: { savedBooks: book } },
-          {
-            new: true,
-            runValidators: true,
-          }
-        );
-        return updatedUser;
-      }
-      throw new AuthenticationError("Please log in first.");
+    saveBook: async (parent, { book }, { user }) => {
+      // Throw error if user not passed in the context
+      if (!user) throw new AuthenticationError("You need to be logged in!");
+
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: user._id },
+        {
+          $addToSet: {
+            savedBooks: book,
+          },
+        },
+        { new: true, runValidators: true }
+      );
+      return updatedUser;
     },
 
     // Remove a book from a user's collection
-    removeBook: async (parent, { bookId }, context) => {
-      if (context.user) {
-        const updatedUser = await User.findOneAndUpdate(
-          { _id: user._id },
-          { $pull: { savedBooks: { bookId: bookId } } },
-          { new: true }
-        );
-        return updatedUser;
-      }
-      throw new AuthenticationError("Please log in first.");
+    removeBook: async (parent, { bookId }, { user }) => {
+      // Throw error if user not passed in the context
+      if (!user) throw new AuthenticationError("You need to be logged in!");
+
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: user._id },
+        { $pull: { savedBooks: { bookId: bookId } } },
+        { new: true }
+      );
+      return updatedUser;
     },
   },
 };
