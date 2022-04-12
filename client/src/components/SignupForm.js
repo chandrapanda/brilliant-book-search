@@ -28,15 +28,11 @@ const SignupForm = () => {
     event.preventDefault();
 
     try {
-      const {
-        data: {
-          addUser: { token, user },
-        },
-      } = await addUser({
+      const { data } = await addUser({
         variables: { ...userFormData },
       });
-      console.log(user);
-      Auth.loginUser(token);
+
+      Auth.loginUser(data.addUser.token);
     } catch (err) {
       console.error(err);
       setShowAlert(true);

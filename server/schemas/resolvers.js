@@ -40,10 +40,11 @@ const resolvers = {
     },
 
     // Save a book to user's collection (subdocument)
-    saveBook: async (parent, { book }, { user }) => {
+    saveBook: async (parent, { book }, context) => {
+      console.log("saveBook from RESOLVERS");
       // If context has a `user` property, the user executing this mutation has a valid JWT and is logged in
       if (context.user) {
-        return User.findOneAndUpdate(
+        const updatedUser = await User.findOneAndUpdate(
           { _id: user._id },
           { $addToSet: { savedBooks: book } },
           {
@@ -51,18 +52,20 @@ const resolvers = {
             runValidators: true,
           }
         );
+        return updatedUser;
       }
       throw new AuthenticationError("Please log in first.");
     },
 
     // Remove a book from a user's collection
-    removeBook: async (parent, { book }, context) => {
+    removeBook: async (parent, { bookId }, context) => {
       if (context.user) {
-        return User.findOneAndUpdate(
-          { _id: context.user._id },
-          { $pull: { books: book } },
+        const updatedUser = await User.findOneAndUpdate(
+          { _id: user._id },
+          { $pull: { savedBooks: { bookId: bookId } } },
           { new: true }
         );
+        return updatedUser;
       }
       throw new AuthenticationError("Please log in first.");
     },
